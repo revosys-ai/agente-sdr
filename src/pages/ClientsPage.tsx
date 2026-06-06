@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { getClients, getTotals } from '../services/clients.service';
-import { ClientStatusBadge } from '../components/ui/Badge';
-import { CountUp } from '../components/ui/CountUp';
-import { LoadingState } from '../components/ui/Spinner';
-import { useAppStore } from '../store/appStore';
+import { ClientStatusBadge } from '../utils/ui/Badge';
+import { MetricCard } from '../utils/ui/MetricCard';
+import { PageHeader } from '../utils/ui/PageHeader';
+import { LoadingState } from '../utils/ui/Spinner';
+import { Card, Btn, StyledTable, Th, Td, TBody, GridCols4, HealthBar, HealthFill } from '../styles/shared';
+import { ClientName, TenantCode } from './ClientsPage.styles';
+import { useToast } from '../hooks/useToast';
 
 export function ClientsPage() {
-  const { addToast } = useAppStore();
+  const toast = useToast();
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ['clients'],
@@ -22,69 +25,50 @@ export function ClientsPage() {
 
   return (
     <div>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">Multi-tenant</div>
-          <h1>Carteira de clientes</h1>
-        </div>
-        <button className="btn" onClick={() => addToast('Em breve: cadastro de novo cliente', 'info')}>
-          + Novo cliente
-        </button>
-      </div>
+      <PageHeader
+        eyebrow="Multi-tenant"
+        title="Carteira de clientes"
+        action={
+          <Btn onClick={() => toast.info('Em breve: cadastro de novo cliente')}>
+            + Novo cliente
+          </Btn>
+        }
+      />
 
-      <div className="grid cols-4" style={{ marginBottom: 16 }}>
-        <div className="card metric feat rise">
-          <div className="eyebrow">Clientes ativos</div>
-          <div className="val">
-            <CountUp to={totals?.active ?? 0} />
-          </div>
-        </div>
-        <div className="card metric rise" style={{ animationDelay: '.06s' }}>
-          <div className="eyebrow">Leads (total)</div>
-          <div className="val"><CountUp to={totals?.leads ?? 0} /></div>
-        </div>
-        <div className="card metric rise" style={{ animationDelay: '.12s' }}>
-          <div className="eyebrow">Reuniões (total)</div>
-          <div className="val"><CountUp to={totals?.meetings ?? 0} /></div>
-        </div>
-        <div className="card metric rise" style={{ animationDelay: '.18s' }}>
-          <div className="eyebrow">Qualif. média</div>
-          <div className="val"><CountUp to={totals?.avgQualification ?? 0} suffix="%" /></div>
-        </div>
-      </div>
+      <GridCols4>
+        <MetricCard label="Clientes ativos"  value={totals?.active ?? 0}           featured delay={0} />
+        <MetricCard label="Leads (total)"    value={totals?.leads ?? 0}            delay={0.06} />
+        <MetricCard label="Reuniões (total)" value={totals?.meetings ?? 0}         delay={0.12} />
+        <MetricCard label="Qualif. média"    value={totals?.avgQualification ?? 0} suffix="%" delay={0.18} />
+      </GridCols4>
 
-      <div className="card" style={{ padding: '10px 14px 6px' }}>
-        <table>
+      <Card $noPad>
+        <StyledTable>
           <thead>
             <tr>
-              <th>Cliente</th>
-              <th>tenant_id</th>
-              <th>Leads</th>
-              <th>Qualif.</th>
-              <th>Reuniões</th>
-              <th>Saúde</th>
-              <th>Status</th>
+              <Th>Cliente</Th><Th>tenant_id</Th><Th>Leads</Th>
+              <Th>Qualif.</Th><Th>Reuniões</Th><Th>Saúde</Th><Th>Status</Th>
             </tr>
           </thead>
-          <tbody>
-            {clients?.map(client => (
-              <tr key={client.id}>
-                <td><b>{client.name}</b></td>
-                <td className="mono muted">{client.tenantId}</td>
-                <td>{client.metrics.leads}</td>
-                <td>{client.metrics.qualification}%</td>
-                <td>{client.metrics.meetings}</td>
-                <td>
-                  <div className="health">
-                    <span className="health-fill" style={{ width: `${client.metrics.health}%` }} />
-                  </div>
-                </td>
-                <td><ClientStatusBadge status={client.metrics.status} /></td>
+          <TBody>
+            {clients?.map(c => (
+              <tr key={c.id}>
+                <Td><ClientName>{c.name}</ClientName></Td>
+                <Td><TenantCode>{c.tenantId}</TenantCode></Td>
+                <Td>{c.metrics.leads}</Td>
+                <Td>{c.metrics.qualification}%</Td>
+                <Td>{c.metrics.meetings}</Td>
+                <Td>
+                  <HealthBar>
+                    <HealthFill $pct={c.metrics.health} />
+                  </HealthBar>
+                </Td>
+                <Td><ClientStatusBadge status={c.metrics.status} /></Td>
               </tr>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TBody>
+        </StyledTable>
+      </Card>
     </div>
   );
 }

@@ -1,30 +1,23 @@
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
+import { useTenantId } from '../hooks/useTenantId';
+import { useToast } from '../hooks/useToast';
 import { getKnowledge, uploadDocument } from '../services/knowledge.service';
-import { DocStatusBadge } from '../components/ui/Badge';
-import { LoadingState } from '../components/ui/Spinner';
-
-function InfoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="17" height="17">
-      <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
-    </svg>
-  );
-}
+import { DocStatusBadge } from '../utils/ui/Badge';
+import { PageHeader } from '../utils/ui/PageHeader';
+import { Banner } from '../utils/ui/Banner';
+import { LoadingState } from '../utils/ui/Spinner';
+import { Card, CardTitle, CardSub } from '../styles/shared';
+import { KbItem, KbLeft, KbIcon, KbName, KbMeta, UploadZone } from './KnowledgePage.styles';
 
 export function KnowledgePage() {
-  const { activeTenantId, addToast } = useAppStore();
-  const { activeRole, user } = useAuthStore();
+  const tenantId = useTenantId();
+  const { activeRole } = useAuthStore();
+  const toast = useToast();
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-
-  const tenantId = activeRole === 'cliente'
-    ? (user?.tenantId ?? activeTenantId)
-    : activeTenantId;
-
   const isReadonly = activeRole === 'cliente';
 
   const { data: docs, isLoading } = useQuery({
@@ -36,9 +29,9 @@ export function KnowledgePage() {
     mutationFn: (file: File) => uploadDocument(tenantId, file),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['knowledge', tenantId] });
-      addToast('Arquivo enviado! Processando ingestão…', 'success');
+      toast.success('Arquivo enviado! Processando ingestão…');
     },
-    onError: () => addToast('Erro ao enviar arquivo.', 'error'),
+    onError: () => toast.error('Erro ao enviar arquivo.'),
   });
 
   const handleFiles = (files: FileList | null) => {
@@ -50,38 +43,32 @@ export function KnowledgePage() {
 
   return (
     <div>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">RAG · tabela documents</div>
-          <h1>Base de conhecimento</h1>
-        </div>
-      </div>
+      <PageHeader eyebrow="RAG · tabela documents" title="Base de conhecimento" />
 
-      <div className="banner">
-        <InfoIcon />
+      <Banner>
         Documentos indexados alimentam o contexto RAG do agente SDR via busca semântica.
-      </div>
+      </Banner>
 
-      <div className="card">
-        <h3>Documentos do cliente <span className="sub">tenant_id no metadata</span></h3>
+      <Card>
+        <CardTitle>Documentos do cliente <CardSub>tenant_id no metadata</CardSub></CardTitle>
 
         {docs?.map(doc => (
-          <div key={doc.id} className="kb-item">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-              <div className="kb-icon">{doc.type}</div>
+          <KbItem key={doc.id}>
+            <KbLeft>
+              <KbIcon>{doc.type}</KbIcon>
               <div>
-                <div style={{ fontWeight: 600 }}>{doc.name}</div>
-                <div className="muted">
+                <KbName>{doc.name}</KbName>
+                <KbMeta>
                   {doc.chunks != null ? `${doc.chunks} chunks · ` : ''}{doc.updatedAt}
-                </div>
+                </KbMeta>
               </div>
-            </div>
+            </KbLeft>
             <DocStatusBadge status={doc.status} />
-          </div>
+          </KbItem>
         ))}
 
-        {(!docs || docs.length === 0) && (
-          <p className="muted" style={{ padding: '16px 0' }}>Nenhum documento indexado.</p>
+        {!docs?.length && (
+          <KbMeta style={{ padding: '16px 0' }}>Nenhum documento indexado.</KbMeta>
         )}
 
         {!isReadonly && (
@@ -94,25 +81,20 @@ export function KnowledgePage() {
               style={{ display: 'none' }}
               onChange={e => handleFiles(e.target.files)}
             />
-            <div
-              className="upload"
-              style={{ borderColor: dragging ? 'var(--blue)' : undefined }}
+            <UploadZone
+              $dragging={dragging}
               onClick={() => fileRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
-              onDrop={e => {
-                e.preventDefault();
-                setDragging(false);
-                handleFiles(e.dataTransfer.files);
-              }}
+              onDrop={e => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
             >
               {uploadMutation.isPending
                 ? 'Enviando…'
                 : 'Arraste um arquivo ou clique para selecionar · dispara o subworkflow de ingestão'}
-            </div>
+            </UploadZone>
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

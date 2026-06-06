@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAppStore } from '../store/appStore';
-import { useAuthStore } from '../store/authStore';
-import { getOverview } from '../services/overview.service';
-import { CountUp } from '../components/ui/CountUp';
-import { LoadingState } from '../components/ui/Spinner';
-import { getBehavior } from '../services/behavior.service';
 import { useNavigate } from 'react-router-dom';
-
-const SPARK_HEIGHTS = [40, 55, 48, 70, 62, 85];
+import { useAppStore } from '../store/appStore';
+import { getOverview } from '../services/overview.service';
+import { getBehavior } from '../services/behavior.service';
+import { useTenantId } from '../hooks/useTenantId';
+import { PageHeader } from '../utils/ui/PageHeader';
+import { MetricCard } from '../utils/ui/MetricCard';
+import { LoadingState } from '../utils/ui/Spinner';
+import { CardTitle, CardSub, Btn, GridCols4, GridCols2, RiseCard } from '../styles/shared';
+import {
+  FunnelRow, FunnelName, Bar1, Bar2, Bar3, Bar4,
+  BehaviorInfo, InfoLabel, InfoText,
+} from './OverviewPage.styles';
 
 export function OverviewPage() {
-  const { activeTenantId } = useAppStore();
-  const { activeRole, user } = useAuthStore();
+  const tenantId = useTenantId();
   const navigate = useNavigate();
-
-  const tenantId = activeRole === 'cliente'
-    ? (user?.tenantId ?? activeTenantId)
-    : activeTenantId;
+  const { addToast: _t } = useAppStore(); // keeps import clean
 
   const { data, isLoading } = useQuery({
     queryKey: ['overview', tenantId],
@@ -32,104 +32,76 @@ export function OverviewPage() {
   if (!data) return null;
 
   const { metrics, funnel } = data;
-  const funnelPct = {
-    qualifying: Math.round((funnel.qualifying / funnel.received) * 100),
-    qualified: Math.round((funnel.qualified / funnel.received) * 100),
-    meeting: Math.round((funnel.meeting / funnel.received) * 100),
-  };
+  const pct = (n: number) => Math.round((n / funnel.received) * 100);
 
   return (
     <div>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">Performance · últimos 30 dias</div>
-          <h1>Visão geral</h1>
-        </div>
-        <button className="btn">Últimos 30 dias ▾</button>
-      </div>
+      <PageHeader
+        eyebrow="Performance · últimos 30 dias"
+        title="Visão geral"
+        action={<Btn>Últimos 30 dias ▾</Btn>}
+      />
 
-      <div className="grid cols-4" style={{ marginBottom: 16 }}>
-        <div className="card metric feat rise" style={{ animationDelay: '.02s' }}>
-          <div className="eyebrow">Leads no período</div>
-          <div className="val"><CountUp to={metrics.leads} /></div>
-          <div className="delta">▲ {metrics.leadsChange}% vs. anterior</div>
-        </div>
+      <GridCols4>
+        <MetricCard
+          label="Leads no período"
+          value={metrics.leads}
+          delta={`▲ ${metrics.leadsChange}% vs. anterior`}
+          featured
+          delay={0.02}
+        />
+        <MetricCard
+          label="Taxa de qualificação"
+          value={metrics.qualificationRate}
+          suffix="%"
+          spark
+          delay={0.08}
+        />
+        <MetricCard
+          label="Reuniões agendadas"
+          value={metrics.meetings}
+          delta={`▲ ${metrics.meetingsChange} vs. anterior`}
+          delay={0.14}
+        />
+        <MetricCard
+          label="Score médio"
+          value={metrics.avgScore}
+          delta={`${metrics.avgScoreChange >= 0 ? '▲' : '▼'} ${Math.abs(metrics.avgScoreChange)} pts`}
+          deltaDown={metrics.avgScoreChange < 0}
+          delay={0.2}
+        />
+      </GridCols4>
 
-        <div className="card metric rise" style={{ animationDelay: '.08s' }}>
-          <div className="eyebrow">Taxa de qualificação</div>
-          <div className="val"><CountUp to={metrics.qualificationRate} suffix="%" /></div>
-          <div className="spark">
-            {SPARK_HEIGHTS.map((h, i) => (
-              <div key={i} className="spark-bar" style={{ height: `${h}%` }} />
-            ))}
-          </div>
-        </div>
+      <GridCols2>
+        <RiseCard $delay={0.26}>
+          <CardTitle>Funil de qualificação <CardSub>LEADS · status</CardSub></CardTitle>
+          <FunnelRow><FunnelName>Leads recebidos</FunnelName><Bar1 $w={100}>{funnel.received}</Bar1></FunnelRow>
+          <FunnelRow><FunnelName>Em qualificação</FunnelName><Bar2 $w={pct(funnel.qualifying)}>{funnel.qualifying} · {pct(funnel.qualifying)}%</Bar2></FunnelRow>
+          <FunnelRow><FunnelName>Qualificados</FunnelName><Bar3 $w={pct(funnel.qualified)}>{funnel.qualified} · {pct(funnel.qualified)}%</Bar3></FunnelRow>
+          <FunnelRow><FunnelName>Reunião agendada</FunnelName><Bar4 $w={pct(funnel.meeting)}>{funnel.meeting} · {pct(funnel.meeting)}%</Bar4></FunnelRow>
+        </RiseCard>
 
-        <div className="card metric rise" style={{ animationDelay: '.14s' }}>
-          <div className="eyebrow">Reuniões agendadas</div>
-          <div className="val"><CountUp to={metrics.meetings} /></div>
-          <div className="delta">▲ {metrics.meetingsChange} vs. anterior</div>
-        </div>
-
-        <div className="card metric rise" style={{ animationDelay: '.2s' }}>
-          <div className="eyebrow">Score médio</div>
-          <div className="val"><CountUp to={metrics.avgScore} /></div>
-          <div className={`delta ${metrics.avgScoreChange < 0 ? 'down' : ''}`}>
-            {metrics.avgScoreChange >= 0 ? '▲' : '▼'} {Math.abs(metrics.avgScoreChange)} pts
-          </div>
-        </div>
-      </div>
-
-      <div className="grid cols-2">
-        <div className="card rise" style={{ animationDelay: '.26s' }}>
-          <h3>Funil de qualificação <span className="sub">LEADS · status</span></h3>
-          <div className="funnel-row">
-            <span className="name">Leads recebidos</span>
-            <div className="bar b1" style={{ width: '100%' }}>{funnel.received}</div>
-          </div>
-          <div className="funnel-row">
-            <span className="name">Em qualificação</span>
-            <div className="bar b2" style={{ width: `${funnelPct.qualifying}%` }}>
-              {funnel.qualifying} · {funnelPct.qualifying}%
-            </div>
-          </div>
-          <div className="funnel-row">
-            <span className="name">Qualificados</span>
-            <div className="bar b3" style={{ width: `${funnelPct.qualified}%` }}>
-              {funnel.qualified} · {funnelPct.qualified}%
-            </div>
-          </div>
-          <div className="funnel-row">
-            <span className="name">Reunião agendada</span>
-            <div className="bar b4" style={{ width: `${Math.max(funnelPct.meeting, 12)}%` }}>
-              {funnel.meeting} · {funnelPct.meeting}%
-            </div>
-          </div>
-        </div>
-
-        <div className="card rise" style={{ animationDelay: '.32s' }}>
-          <h3>Comportamento da IA <span className="sub">SDR_CLIENTES</span></h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+        <RiseCard $delay={0.32}>
+          <CardTitle>Comportamento da IA <CardSub>SDR_CLIENTES</CardSub></CardTitle>
+          <BehaviorInfo>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 4 }}>Persona &amp; tom</div>
-              <div>{behavior?.personaNome} · {behavior?.personaTom}</div>
+              <InfoLabel>Persona &amp; tom</InfoLabel>
+              <InfoText>{behavior?.personaNome} · {behavior?.personaTom}</InfoText>
             </div>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 4 }}>Produto &amp; ICP</div>
-              <div style={{ fontSize: 13, color: 'var(--text-2)' }}>{behavior?.produtoDescricao?.slice(0, 60)}…</div>
+              <InfoLabel>Produto &amp; ICP</InfoLabel>
+              <InfoText $muted>{behavior?.produtoDescricao?.slice(0, 60)}…</InfoText>
             </div>
             <div>
-              <div className="eyebrow" style={{ marginBottom: 4 }}>Roteiro</div>
-              <div>
-                {behavior?.perguntas?.split('\n').length ?? 0} perguntas · critérios de corte definidos
-              </div>
+              <InfoLabel>Roteiro</InfoLabel>
+              <InfoText>{behavior?.perguntas?.split('\n').length ?? 0} perguntas · critérios definidos</InfoText>
             </div>
-            <button className="btn" style={{ width: '100%' }} onClick={() => navigate('/behavior')}>
+            <Btn style={{ width: '100%' }} onClick={() => navigate('/behavior')}>
               Editar comportamento →
-            </button>
-          </div>
-        </div>
-      </div>
+            </Btn>
+          </BehaviorInfo>
+        </RiseCard>
+      </GridCols2>
     </div>
   );
 }

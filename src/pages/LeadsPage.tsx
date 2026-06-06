@@ -1,33 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAppStore } from '../store/appStore';
-import { useAuthStore } from '../store/authStore';
+import { useTenantId } from '../hooks/useTenantId';
+import { useToast } from '../hooks/useToast';
 import { getLeads, exportLeadsCSV } from '../services/leads.service';
-import { StatusBadge } from '../components/ui/Badge';
-import { LoadingState } from '../components/ui/Spinner';
-import { useAppStore as useApp } from '../store/appStore';
+import { StatusBadge } from '../utils/ui/Badge';
+import { PageHeader } from '../utils/ui/PageHeader';
+import { LoadingState } from '../utils/ui/Spinner';
+import { Card, Btn, StyledTable, Th, Td, TBody } from '../styles/shared';
+import { BantCell, ScoreValue, EmptyRow } from './LeadsPage.styles';
 import type { BantScore } from '../types';
 
 function BantDisplay({ bant }: { bant: BantScore }) {
-  const fmt = (v: boolean | null, label: string) => {
-    if (v === null) return `–`;
-    if (v === false) return `✗`;
-    return label;
-  };
+  const f = (v: boolean | null, label: string) =>
+    v === null ? '–' : v === false ? '✗' : label;
   return (
-    <span className="mono muted">
-      {fmt(bant.budget, 'B')}·{fmt(bant.authority, 'A')}·{fmt(bant.need, 'N')}·{fmt(bant.timeline, 'T')}
-    </span>
+    <BantCell>
+      {f(bant.budget, 'B')}·{f(bant.authority, 'A')}·{f(bant.need, 'N')}·{f(bant.timeline, 'T')}
+    </BantCell>
   );
 }
 
 export function LeadsPage() {
-  const { activeTenantId } = useAppStore();
-  const { activeRole, user } = useAuthStore();
-  const { addToast } = useApp();
-
-  const tenantId = activeRole === 'cliente'
-    ? (user?.tenantId ?? activeTenantId)
-    : activeTenantId;
+  const tenantId = useTenantId();
+  const toast = useToast();
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads', tenantId],
@@ -36,56 +30,45 @@ export function LeadsPage() {
 
   const handleExport = async () => {
     await exportLeadsCSV(tenantId);
-    addToast('CSV exportado com sucesso!', 'success');
+    toast.success('CSV exportado com sucesso!');
   };
 
   if (isLoading) return <LoadingState />;
 
   return (
     <div>
-      <div className="page-head">
-        <div>
-          <div className="eyebrow">Pipeline</div>
-          <h1>Leads</h1>
-        </div>
-        <button className="btn" onClick={handleExport}>Exportar CSV</button>
-      </div>
+      <PageHeader
+        eyebrow="Pipeline"
+        title="Leads"
+        action={<Btn onClick={handleExport}>Exportar CSV</Btn>}
+      />
 
-      <div className="card" style={{ padding: '10px 14px 6px' }}>
-        <table>
+      <Card $noPad>
+        <StyledTable>
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Empresa</th>
-              <th>Cargo</th>
-              <th>BANT</th>
-              <th>Score</th>
-              <th>Status</th>
-              <th>Atualizado</th>
+              <Th>Nome</Th><Th>Empresa</Th><Th>Cargo</Th>
+              <Th>BANT</Th><Th>Score</Th><Th>Status</Th><Th>Atualizado</Th>
             </tr>
           </thead>
-          <tbody>
+          <TBody>
             {leads?.map(lead => (
               <tr key={lead.id}>
-                <td>{lead.name}</td>
-                <td>{lead.company}</td>
-                <td style={{ color: 'var(--text-2)' }}>{lead.role}</td>
-                <td><BantDisplay bant={lead.bant} /></td>
-                <td><b style={{ fontFamily: 'Sora' }}>{lead.score}</b></td>
-                <td><StatusBadge status={lead.status} /></td>
-                <td className="muted">{lead.updatedAt}</td>
+                <Td>{lead.name}</Td>
+                <Td>{lead.company}</Td>
+                <Td>{lead.role}</Td>
+                <Td><BantDisplay bant={lead.bant} /></Td>
+                <Td><ScoreValue>{lead.score}</ScoreValue></Td>
+                <Td><StatusBadge status={lead.status} /></Td>
+                <Td><span style={{ color: '#525a70', fontSize: 12 }}>{lead.updatedAt}</span></Td>
               </tr>
             ))}
-            {(!leads || leads.length === 0) && (
-              <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-3)' }}>
-                  Nenhum lead encontrado
-                </td>
-              </tr>
+            {!leads?.length && (
+              <tr><EmptyRow colSpan={7}>Nenhum lead encontrado</EmptyRow></tr>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TBody>
+        </StyledTable>
+      </Card>
     </div>
   );
 }
