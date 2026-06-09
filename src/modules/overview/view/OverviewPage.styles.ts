@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { GridCols2, RiseCard } from '../styles/shared';
+import { GridCols2, RiseCard } from '../../../styles/shared';
 
 export const FunnelRow = styled.div`
   display: flex;

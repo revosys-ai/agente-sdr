@@ -5,11 +5,11 @@ import { useTenantId } from './useTenantId';
 const mockAppState = vi.fn();
 const mockAuthState = vi.fn();
 
-vi.mock('../store/appStore', () => ({
+vi.mock('../../../store/appStore', () => ({
   useAppStore: (sel: (s: object) => unknown) => sel(mockAppState()),
 }));
 
-vi.mock('../store/authStore', () => ({
+vi.mock('../../../store/authStore', () => ({
   useAuthStore: (sel: (s: object) => unknown) => sel(mockAuthState()),
 }));
 

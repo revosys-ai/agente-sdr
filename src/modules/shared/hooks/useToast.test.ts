@@ -4,7 +4,7 @@ import { useToast } from './useToast';
 
 const mockAddToast = vi.fn();
 
-vi.mock('../store/appStore', () => ({
+vi.mock('../../../store/appStore', () => ({
   useAppStore: (selector: (s: { addToast: typeof mockAddToast }) => unknown) =>
     selector({ addToast: mockAddToast }),
 }));

@@ -1,21 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuthStore } from '../store/authStore';
-import { useTenantId } from '../hooks/useTenantId';
-import { useToast } from '../hooks/useToast';
-import { getBehavior, saveBehavior, previewResponse } from '../services/behavior.service';
-import { PageHeader } from '../utils/ui/PageHeader';
-import { Banner } from '../utils/ui/Banner';
-import { LoadingState, Spinner } from '../utils/ui/Spinner';
+import { useAuthStore } from '../../../store/authStore';
+import { useBehavior } from '../hooks/useBehavior';
+import { PageHeader } from '../../../utils/ui/PageHeader';
+import { Banner } from '../../../utils/ui/Banner';
+import { LoadingState, Spinner } from '../../../utils/ui/Spinner';
 import {
   Card, CardTitle, CardSub, BtnPrimary, Btn,
   FieldRow, Field, FieldLabel, StyledInput, StyledTextarea, StyledSelect,
-} from '../styles/shared';
+} from '../../../styles/shared';
 import { EditLock, SaveBar, SaveMeta, PreviewBox, CardsStack } from './BehaviorPage.styles';
-import type { BehaviorConfig } from '../types';
+import type { BehaviorConfig } from '../../../types';
 
 const schema = z.object({
   personaNome: z.string().min(1),
@@ -41,18 +38,9 @@ function LockIcon() {
 }
 
 export function BehaviorPage() {
-  const tenantId = useTenantId();
   const { activeRole } = useAuthStore();
-  const toast = useToast();
-  const qc = useQueryClient();
-  const [preview, setPreview] = useState<string | null>(null);
-  const [loadingPreview, setLoadingPreview] = useState(false);
+  const { data, isLoading, save, isSaving, preview, loadingPreview, handlePreview } = useBehavior();
   const isReadonly = activeRole === 'cliente';
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['behavior', tenantId],
-    queryFn: () => getBehavior(tenantId),
-  });
 
   const { register, reset, handleSubmit, formState: { errors, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -60,23 +48,9 @@ export function BehaviorPage() {
 
   useEffect(() => { if (data) reset(data as FormData); }, [data, reset]);
 
-  const mutation = useMutation({
-    mutationFn: (d: Partial<BehaviorConfig>) => saveBehavior(tenantId, d),
-    onSuccess: updated => {
-      qc.setQueryData(['behavior', tenantId], updated);
-      toast.success('Comportamento salvo com sucesso!');
-    },
-    onError: () => toast.error('Erro ao salvar. Tente novamente.'),
-  });
-
-  const handlePreview = async () => {
-    setLoadingPreview(true);
-    const text = await previewResponse(tenantId);
-    setPreview(text);
-    setLoadingPreview(false);
-  };
-
   if (isLoading) return <LoadingState />;
+
+  const onSubmit = (d: FormData) => save(d as Partial<BehaviorConfig>);
 
   return (
     <div>
@@ -94,7 +68,7 @@ export function BehaviorPage() {
         Credenciais e prompt interno não aparecem aqui.
       </Banner>
 
-      <form onSubmit={handleSubmit(d => mutation.mutate(d))}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardsStack>
           <Card>
             <CardTitle>Persona &amp; tom de voz</CardTitle>
@@ -185,8 +159,8 @@ export function BehaviorPage() {
 
         {!isReadonly && (
           <SaveBar>
-            <BtnPrimary type="submit" disabled={mutation.isPending || !isDirty}>
-              {mutation.isPending ? <Spinner size={16} /> : 'Salvar alterações'}
+            <BtnPrimary type="submit" disabled={isSaving || !isDirty}>
+              {isSaving ? <Spinner size={16} /> : 'Salvar alterações'}
             </BtnPrimary>
             <SaveMeta>última edição {data?.lastEdit} · versão {data?.version}</SaveMeta>
           </SaveBar>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Mono } from '../styles/shared';
+import { Mono } from '../../../styles/shared';
 
 export const BantCell = styled(Mono)`
   color: ${({ theme }) => theme.colors.text3};

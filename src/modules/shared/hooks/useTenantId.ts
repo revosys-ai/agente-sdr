@@ -1,5 +1,5 @@
-import { useAppStore } from '../store/appStore';
-import { useAuthStore } from '../store/authStore';
+import { useAppStore } from '../../../store/appStore';
+import { useAuthStore } from '../../../store/authStore';
 
 export function useTenantId(): string {
   const activeTenantId = useAppStore(s => s.activeTenantId);

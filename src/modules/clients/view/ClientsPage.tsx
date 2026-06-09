@@ -1,25 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
-import { getClients, getTotals } from '../services/clients.service';
-import { ClientStatusBadge } from '../utils/ui/Badge';
-import { MetricCard } from '../utils/ui/MetricCard';
-import { PageHeader } from '../utils/ui/PageHeader';
-import { LoadingState } from '../utils/ui/Spinner';
-import { Card, Btn, StyledTable, Th, Td, TBody, GridCols4, HealthBar, HealthFill } from '../styles/shared';
+import { useClients } from '../hooks/useClients';
+import { ClientStatusBadge } from '../../../utils/ui/Badge';
+import { MetricCard } from '../../../utils/ui/MetricCard';
+import { PageHeader } from '../../../utils/ui/PageHeader';
+import { LoadingState } from '../../../utils/ui/Spinner';
+import { Card, Btn, StyledTable, Th, Td, TBody, GridCols4, HealthBar, HealthFill } from '../../../styles/shared';
 import { ClientName, TenantCode } from './ClientsPage.styles';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../../shared/hooks/useToast';
 
 export function ClientsPage() {
   const toast = useToast();
-
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ['clients'],
-    queryFn: getClients,
-  });
-
-  const { data: totals } = useQuery({
-    queryKey: ['clients-totals'],
-    queryFn: getTotals,
-  });
+  const { clients, isLoading, totals } = useClients();
 
   if (isLoading) return <LoadingState />;
 

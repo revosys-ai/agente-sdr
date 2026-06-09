@@ -1,14 +1,13 @@
-import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styled from 'styled-components';
-import { float } from '../../styles/GlobalStyle';
-import { useAuthStore } from '../../store/authStore';
-import { mockLogin } from '../../mocks/auth.mock';
-import { RevoLogo } from '../ui/RevoLogo';
-import { Spinner } from '../ui/Spinner';
+import { float } from '../../../styles/GlobalStyle';
+import { useAuthStore } from '../../../store/authStore';
+import { useLogin } from '../hooks/useLogin';
+import { RevoLogo } from '../../../utils/ui/RevoLogo';
+import { Spinner } from '../../../utils/ui/Spinner';
 
 const schema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -211,9 +210,8 @@ const DemoText = styled.p`
 `;
 
 export function LoginPage() {
-  const { login, isAuthenticated } = useAuthStore();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { isAuthenticated } = useAuthStore();
+  const { submit, error, loading } = useLogin();
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -222,16 +220,7 @@ export function LoginPage() {
   if (isAuthenticated) return <Navigate to="/overview" replace />;
 
   const onSubmit = async (data: FormData) => {
-    setLoading(true);
-    setError('');
-    await new Promise(r => setTimeout(r, 700));
-    const result = mockLogin(data.email, data.password);
-    if (result) {
-      login(result.user, result.tokens);
-    } else {
-      setError('E-mail ou senha inválidos.');
-    }
-    setLoading(false);
+    await submit(data.email, data.password);
   };
 
   return (

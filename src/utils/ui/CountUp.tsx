@@ -1,4 +1,4 @@
-import { useCountUp } from '../../hooks/useCountUp';
+import { useCountUp } from '../../modules/shared/hooks/useCountUp';
 
 interface Props {
   to: number;

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import { rise } from '../../styles/GlobalStyle';
-import { useCountUp } from '../../hooks/useCountUp';
+import { useCountUp } from '../../modules/shared/hooks/useCountUp';
 
 const Card = styled.div<{ $featured?: boolean; $delay?: number }>`
   position: relative;

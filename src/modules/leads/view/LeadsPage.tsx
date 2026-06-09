@@ -1,13 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { useTenantId } from '../hooks/useTenantId';
-import { useToast } from '../hooks/useToast';
-import { getLeads, exportLeadsCSV } from '../services/leads.service';
-import { StatusBadge } from '../utils/ui/Badge';
-import { PageHeader } from '../utils/ui/PageHeader';
-import { LoadingState } from '../utils/ui/Spinner';
-import { Card, Btn, StyledTable, Th, Td, TBody } from '../styles/shared';
+import { useLeads } from '../hooks/useLeads';
+import { StatusBadge } from '../../../utils/ui/Badge';
+import { PageHeader } from '../../../utils/ui/PageHeader';
+import { LoadingState } from '../../../utils/ui/Spinner';
+import { Card, Btn, StyledTable, Th, Td, TBody } from '../../../styles/shared';
 import { BantCell, ScoreValue, EmptyRow } from './LeadsPage.styles';
-import type { BantScore } from '../types';
+import type { BantScore } from '../../../types';
 
 function BantDisplay({ bant }: { bant: BantScore }) {
   const f = (v: boolean | null, label: string) =>
@@ -20,18 +17,7 @@ function BantDisplay({ bant }: { bant: BantScore }) {
 }
 
 export function LeadsPage() {
-  const tenantId = useTenantId();
-  const toast = useToast();
-
-  const { data: leads, isLoading } = useQuery({
-    queryKey: ['leads', tenantId],
-    queryFn: () => getLeads(tenantId),
-  });
-
-  const handleExport = async () => {
-    await exportLeadsCSV(tenantId);
-    toast.success('CSV exportado com sucesso!');
-  };
+  const { data: leads, isLoading, handleExport } = useLeads();
 
   if (isLoading) return <LoadingState />;
 

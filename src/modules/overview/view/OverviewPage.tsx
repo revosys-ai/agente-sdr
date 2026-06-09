@@ -1,32 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../store/appStore';
-import { getOverview } from '../services/overview.service';
-import { getBehavior } from '../services/behavior.service';
-import { useTenantId } from '../hooks/useTenantId';
-import { PageHeader } from '../utils/ui/PageHeader';
-import { MetricCard } from '../utils/ui/MetricCard';
-import { LoadingState } from '../utils/ui/Spinner';
-import { CardTitle, CardSub, Btn, GridCols4, GridCols2, RiseCard } from '../styles/shared';
+import { useOverview } from '../hooks/useOverview';
+import { PageHeader } from '../../../utils/ui/PageHeader';
+import { MetricCard } from '../../../utils/ui/MetricCard';
+import { LoadingState } from '../../../utils/ui/Spinner';
+import { CardTitle, CardSub, Btn, GridCols4, GridCols2, RiseCard } from '../../../styles/shared';
 import {
   FunnelRow, FunnelName, Bar1, Bar2, Bar3, Bar4,
   BehaviorInfo, InfoLabel, InfoText,
 } from './OverviewPage.styles';
 
 export function OverviewPage() {
-  const tenantId = useTenantId();
-  const navigate = useNavigate();
-  const { addToast: _t } = useAppStore(); // keeps import clean
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['overview', tenantId],
-    queryFn: () => getOverview(tenantId),
-  });
-
-  const { data: behavior } = useQuery({
-    queryKey: ['behavior', tenantId],
-    queryFn: () => getBehavior(tenantId),
-  });
+  const { data, isLoading, behavior, goToBehavior } = useOverview();
 
   if (isLoading) return <LoadingState />;
   if (!data) return null;
@@ -96,7 +79,7 @@ export function OverviewPage() {
               <InfoLabel>Roteiro</InfoLabel>
               <InfoText>{behavior?.perguntas?.split('\n').length ?? 0} perguntas · critérios definidos</InfoText>
             </div>
-            <Btn style={{ width: '100%' }} onClick={() => navigate('/behavior')}>
+            <Btn style={{ width: '100%' }} onClick={goToBehavior}>
               Editar comportamento →
             </Btn>
           </BehaviorInfo>

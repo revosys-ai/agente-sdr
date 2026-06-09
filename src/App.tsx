@@ -3,13 +3,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'styled-components';
 import { theme } from './styles/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
-import { LoginPage } from './utils/auth/LoginPage';
+import { LoginPage } from './modules/auth/view/LoginPage';
 import { AppLayout } from './utils/layout/AppLayout';
-import { OverviewPage } from './pages/OverviewPage';
-import { LeadsPage } from './pages/LeadsPage';
-import { BehaviorPage } from './pages/BehaviorPage';
-import { KnowledgePage } from './pages/KnowledgePage';
-import { ClientsPage } from './pages/ClientsPage';
+import { OverviewPage } from './modules/overview/view/OverviewPage';
+import { LeadsPage } from './modules/leads/view/LeadsPage';
+import { BehaviorPage } from './modules/behavior/view/BehaviorPage';
+import { KnowledgePage } from './modules/knowledge/view/KnowledgePage';
+import { ClientsPage } from './modules/clients/view/ClientsPage';
 import { useAuthStore } from './store/authStore';
 
 const qc = new QueryClient({
