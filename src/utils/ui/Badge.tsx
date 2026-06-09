@@ -4,7 +4,7 @@ import type { LeadStatus } from '../../types';
 type Variant = 'novo' | 'qual' | 'ok' | 'meet' | 'desq';
 
 const variantStyles: Record<Variant, ReturnType<typeof css>> = {
-  novo: css`background: rgba(255,255,255,.06); color: ${({ theme }) => theme.colors.text2};`,
+  novo: css`background: ${({ theme }) => theme.colors.surface3}; color: ${({ theme }) => theme.colors.text2};`,
   qual: css`background: rgba(111,210,255,.13); color: ${({ theme }) => theme.colors.cyan};`,
   ok:   css`background: rgba(58,160,255,.16);  color: ${({ theme }) => theme.colors.blue};`,
   meet: css`background: rgba(255,154,60,.16);  color: ${({ theme }) => theme.colors.gold};`,

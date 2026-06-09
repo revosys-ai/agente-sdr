@@ -40,8 +40,8 @@ const GridBg = styled.div`
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    linear-gradient(${({ theme }) => theme.colors.gridLine} 1px, transparent 1px),
+    linear-gradient(90deg, ${({ theme }) => theme.colors.gridLine} 1px, transparent 1px);
   background-size: 46px 46px;
   mask: radial-gradient(circle at 55% 28%, #000, transparent 80%);
 `;
@@ -58,12 +58,12 @@ const Center = styled.div`
 const Card = styled.div`
   position: relative;
   width: 398px;
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.018));
+  background: linear-gradient(180deg, ${({ theme }) => theme.colors.loginCardFrom}, ${({ theme }) => theme.colors.loginCardTo});
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: 24px;
   padding: 42px 38px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 34px 90px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.07);
+  box-shadow: 0 34px 90px ${({ theme }) => theme.colors.shadowStrong}, inset 0 1px 0 ${({ theme }) => theme.colors.navActiveShadow};
 
   &::before {
     content: '';
@@ -119,7 +119,7 @@ const FieldLabel = styled.label`
 
 const Input = styled.input<{ $error?: boolean }>`
   width: 100%;
-  background: rgba(255,255,255,.04);
+  background: ${({ theme }) => theme.colors.inputBg};
   border: 1px solid ${({ theme, $error }) => ($error ? theme.colors.red : theme.colors.border)};
   color: ${({ theme }) => theme.colors.text};
   border-radius: ${({ theme }) => theme.radius.sm};
@@ -187,7 +187,7 @@ const Hint = styled.p`
 const DemoBox = styled.div`
   margin-top: 20px;
   padding: 12px 16px;
-  background: rgba(255,255,255,.03);
+  background: ${({ theme }) => theme.colors.demoBoxBg};
   border-radius: 10px;
   border: 1px solid ${({ theme }) => theme.colors.border};
 `;

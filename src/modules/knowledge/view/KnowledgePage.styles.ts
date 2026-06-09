@@ -5,7 +5,7 @@ export const KbItem = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid ${({ theme }) => theme.colors.rowBorder};
 
   &:last-of-type { border: none; }
 `;

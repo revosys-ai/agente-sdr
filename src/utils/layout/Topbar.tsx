@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useAuthStore } from '../../store/authStore';
 import { useAppStore, CLIENT_OPTIONS } from '../../store/appStore';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 const Header = styled.header`
   display: flex;
@@ -12,7 +13,7 @@ const Header = styled.header`
   position: sticky;
   top: 0;
   z-index: 9;
-  background: rgba(4,5,10,.65);
+  background: ${({ theme }) => theme.colors.headerBg};
   backdrop-filter: blur(14px);
 `;
 
@@ -157,6 +158,7 @@ export function Topbar() {
         <RoleTag $role={activeRole}>
           {activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}
         </RoleTag>
+        <ThemeToggle />
       </Right>
     </Header>
   );

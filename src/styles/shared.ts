@@ -46,7 +46,7 @@ export const Btn = styled.button`
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.border2};
-    background: rgba(255,255,255,.07);
+    background: ${({ theme }) => theme.colors.surface3};
     transform: translateY(-1px);
   }
 `;
@@ -119,7 +119,7 @@ export const FieldLabel = styled.label`
 
 export const inputBase = css`
   width: 100%;
-  background: rgba(255,255,255,.04);
+  background: ${({ theme }) => theme.colors.inputBg};
   border: 1px solid ${({ theme }) => theme.colors.border};
   color: ${({ theme }) => theme.colors.text};
   border-radius: ${({ theme }) => theme.radius.sm};
@@ -179,19 +179,19 @@ export const Th = styled.th`
 
 export const Td = styled.td`
   padding: 14px;
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid ${({ theme }) => theme.colors.rowBorder};
 `;
 
 export const TBody = styled.tbody`
   tr { transition: background 0.14s; }
-  tr:hover { background: rgba(255,255,255,.03); }
+  tr:hover { background: ${({ theme }) => theme.colors.rowHover}; }
   tr:last-child td { border-bottom: none; }
 `;
 
 export const HealthBar = styled.div`
   height: 6px;
   border-radius: 4px;
-  background: rgba(255,255,255,.07);
+  background: ${({ theme }) => theme.colors.surface3};
   overflow: hidden;
   width: 96px;
 `;

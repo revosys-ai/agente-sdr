@@ -40,8 +40,8 @@ const GridBg = styled.div`
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    linear-gradient(${({ theme }) => theme.colors.gridLine} 1px, transparent 1px),
+    linear-gradient(90deg, ${({ theme }) => theme.colors.gridLine} 1px, transparent 1px);
   background-size: 46px 46px;
   mask: radial-gradient(circle at 55% 28%, #000, transparent 80%);
 `;

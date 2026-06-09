@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'styled-components';
-import { theme } from './styles/theme';
+import { lightTheme, darkTheme } from './styles/theme';
+import { useThemeStore } from './store/themeStore';
 import { GlobalStyle } from './styles/GlobalStyle';
 import { LoginPage } from './modules/auth/view/LoginPage';
 import { AppLayout } from './utils/layout/AppLayout';
@@ -23,6 +24,9 @@ function EquipeGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const mode = useThemeStore(s => s.mode);
+  const theme = mode === 'dark' ? darkTheme : lightTheme;
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />

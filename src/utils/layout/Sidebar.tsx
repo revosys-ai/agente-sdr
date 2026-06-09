@@ -33,7 +33,7 @@ const Aside = styled.aside`
   top: 0;
   height: 100vh;
   border-right: 1px solid ${({ theme }) => theme.colors.border};
-  background: linear-gradient(180deg, rgba(255,255,255,.025), transparent);
+  background: linear-gradient(180deg, ${({ theme }) => theme.colors.surface}, transparent);
   overflow-y: auto;
 
   @media (max-width: 900px) { display: none; }
@@ -51,7 +51,7 @@ const Wordmark = styled.span`
   font-weight: 800;
   letter-spacing: 0.02em;
   font-size: 18px;
-  color: #fff;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const NavCaption = styled.p`
@@ -91,14 +91,14 @@ const NavItem = styled(NavLink)`
   color: ${({ theme }) => theme.colors.text2};
 
   &:hover {
-    background: rgba(255,255,255,.045);
+    background: ${({ theme }) => theme.colors.navHoverBg};
     color: ${({ theme }) => theme.colors.text};
   }
 
   &.active {
     background: linear-gradient(135deg, rgba(58,160,255,.18), rgba(111,210,255,.08));
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
+    color: ${({ theme }) => theme.colors.text};
+    box-shadow: inset 0 0 0 1px ${({ theme }) => theme.colors.navActiveShadow};
 
     svg { color: ${({ theme }) => theme.colors.cyan}; filter: drop-shadow(0 0 6px ${({ theme }) => theme.glows.blue}); }
 
@@ -143,7 +143,7 @@ const Avatar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: ${({ theme }) => theme.colors.text};
   font-weight: 600;
   font-size: 13px;
   font-family: ${({ theme }) => theme.fonts.display};

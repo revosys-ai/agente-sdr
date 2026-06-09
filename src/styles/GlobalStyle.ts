@@ -33,6 +33,7 @@ export const GlobalStyle = createGlobalStyle`
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
   h1, h2, h3 {
@@ -52,6 +53,6 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   ::selection {
-    background: rgba(58,160,255,.35);
+    background: ${({ theme }) => theme.colors.selection};
   }
 `;
